@@ -6,27 +6,9 @@ use vm_memory::GuestMemory;
 use vm_memory::GuestMemoryMmap;
 use vm_memory::GuestMemoryRegion;
 
-const MEM_32BIT_GAP_SIZE: u64 = 768 << 20;
-/// The start of the memory area reserved for MMIO devices.
-const MMIO_MEM_START: u64 = FIRST_ADDR_PAST_32BITS - MEM_32BIT_GAP_SIZE;
-const FIRST_ADDR_PAST_32BITS: u64 = 1 << 32;
-
-fn arch_memory_regions(size: usize) -> Vec<(GuestAddress, usize)> {
-    // It's safe to cast MMIO_MEM_START to usize because it fits in a u32 variable
-    // (It points to an address in the 32 bit space).
-    match size.checked_sub(MMIO_MEM_START as usize) {
-        // case1: guest memory fits before the gap
-        None | Some(0) => vec![(GuestAddress(0), size)],
-        // case2: guest memory extends beyond the gap
-        Some(remaining) => vec![
-            (GuestAddress(0), MMIO_MEM_START as usize),
-            (GuestAddress(FIRST_ADDR_PAST_32BITS), remaining),
-        ],
-    }
-}
-
 fn allocate(size: usize) -> GuestMemoryMmap {
-    GuestMemoryMmap::from_ranges(&arch_memory_regions(size)).unwrap()
+    let range = vec![(GuestAddress(0), size)];
+    GuestMemoryMmap::from_ranges(&range).unwrap()
 }
 
 pub(super) fn setup_memory(vm: &VmFd, memory_size: usize) {
