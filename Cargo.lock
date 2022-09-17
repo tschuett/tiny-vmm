@@ -47,7 +47,6 @@ dependencies = [
  "anyhow",
  "kvm-bindings",
  "kvm-ioctls",
- "libc",
  "vm-memory",
 ]
 

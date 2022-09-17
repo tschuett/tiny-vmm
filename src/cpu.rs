@@ -10,7 +10,7 @@ pub(super) fn setup_and_run(vcpu_fd: &VcpuFd) {
 
     // special registers
     let mut sp_regs = vcpu_fd.get_sregs().unwrap();
-    sp_regs.cs.base = 0;
+    sp_regs.cs.base = 0; // code segment
     sp_regs.cs.selector = 0;
     vcpu_fd.set_sregs(&sp_regs).unwrap();
 
