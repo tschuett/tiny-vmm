@@ -42,12 +42,14 @@ pub(super) fn setup_memory(vm: &VmFd, memory_size: usize) {
             userspace_addr: guest_mem.get_host_address(region.start_addr()).unwrap() as u64,
         };
 
+        // set memory region in VM
         unsafe { vm.set_user_memory_region(user_region).unwrap() };
     }
 
-    // Dummy x86 code that just calls cpuid and halt.
+    // dummy x86 code that just calls cpuid and halt.
     let x86_code = [0x0F, 0xA2 /*cpuid*/, 0xf4 /* hlt */];
 
+    // write dummy code into VM memory at address 0
     if let Ok(code_slice) = guest_mem.get_slice(GuestAddress::new(0), x86_code.len()) {
         code_slice.copy_from(&x86_code[..]);
     } else {
