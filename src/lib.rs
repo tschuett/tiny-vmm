@@ -23,14 +23,7 @@ const MEMORY_SIZE: usize = 1024 * 1024;
 
 /// create a tiny vm and run a few instructions.
 pub fn create_and_run_vm() {
-    let kvm = match Kvm::new() {
-        Ok(kv) => {
-            kv
-        }
-        Err(e) => {
-            println!("Kvm::new() failed with: {:?}", e);
-            return
-        }};
+    let kvm = Kvm::new().unwrap();
 
     let kvm_cpuid = kvm.get_supported_cpuid(KVM_MAX_CPUID_ENTRIES).unwrap();
 
@@ -46,5 +39,6 @@ pub fn create_and_run_vm() {
     // setup cpuid
     vcpu_fd.set_cpuid2(&kvm_cpuid).unwrap();
 
+    // setup and run vcpu
     cpu::setup_and_run(&vcpu_fd);
 }

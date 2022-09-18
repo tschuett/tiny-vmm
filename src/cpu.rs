@@ -3,8 +3,10 @@ use kvm_ioctls::{VcpuExit, VcpuFd};
 pub(super) fn setup_and_run(vcpu_fd: &VcpuFd) {
     // general purpose registers
     let mut gp_regs = vcpu_fd.get_regs().unwrap();
-    // base of memory and instructions (instruction pointer)
+    // instruction pointer
     gp_regs.rip = 0;
+    // input for cpuid
+    gp_regs.rax = 0;
     vcpu_fd.set_regs(&gp_regs).unwrap();
 
     // special registers

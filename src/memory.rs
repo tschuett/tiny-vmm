@@ -16,6 +16,7 @@ pub(super) fn setup_memory(vm: &VmFd, memory_size: usize) {
     let flags = 0x0;
 
     for (index, region) in guest_mem.iter().enumerate() {
+        // setup structure for ioctl
         let user_region = kvm_userspace_memory_region {
             slot: index as u32,
             flags,
