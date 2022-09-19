@@ -19,26 +19,30 @@ mod cpu;
 use kvm_ioctls::Kvm;
 use kvm_bindings::KVM_MAX_CPUID_ENTRIES;
 
+use anyhow::Result;
+
 const MEMORY_SIZE: usize = 1024 * 1024;
 
 /// create a tiny vm and run a few instructions.
-pub fn create_and_run_vm() {
-    let kvm = Kvm::new().unwrap();
+pub fn create_and_run_vm() -> Result<()>{
+    let kvm = Kvm::new()?;
 
-    let kvm_cpuid = kvm.get_supported_cpuid(KVM_MAX_CPUID_ENTRIES).unwrap();
+    let kvm_cpuid = kvm.get_supported_cpuid(KVM_MAX_CPUID_ENTRIES)?;
 
     // create a virtual machine
-    let vm = kvm.create_vm().unwrap();
+    let vm = kvm.create_vm()?;
 
     // setup memory and instructions
-    memory::setup_memory(&vm, MEMORY_SIZE);
+    memory::setup_memory(&vm, MEMORY_SIZE)?;
 
     // create one vcpu
-    let vcpu_fd = vm.create_vcpu(0).unwrap();
+    let vcpu_fd = vm.create_vcpu(0)?;
 
     // setup cpuid
-    vcpu_fd.set_cpuid2(&kvm_cpuid).unwrap();
+    vcpu_fd.set_cpuid2(&kvm_cpuid)?;
 
     // setup and run vcpu
-    cpu::setup_and_run(&vcpu_fd);
+    cpu::setup_and_run(&vcpu_fd)?;
+
+    Ok(())
 }

@@ -6,12 +6,14 @@ use vm_memory::GuestMemory;
 use vm_memory::GuestMemoryMmap;
 use vm_memory::GuestMemoryRegion;
 
+use anyhow::Result;
+
 fn allocate(size: usize) -> GuestMemoryMmap {
     let range = vec![(GuestAddress(0), size)];
     GuestMemoryMmap::from_ranges(&range).unwrap()
 }
 
-pub(super) fn setup_memory(vm: &VmFd, memory_size: usize) {
+pub(super) fn setup_memory(vm: &VmFd, memory_size: usize) -> Result<()> {
     let guest_mem = allocate(memory_size);
     let flags = 0x0;
 
@@ -22,11 +24,11 @@ pub(super) fn setup_memory(vm: &VmFd, memory_size: usize) {
             flags,
             guest_phys_addr: region.start_addr().raw_value() as u64,
             memory_size: region.len() as u64,
-            userspace_addr: guest_mem.get_host_address(region.start_addr()).unwrap() as u64,
+            userspace_addr: guest_mem.get_host_address(region.start_addr())? as u64,
         };
 
         // set memory region in VM
-        unsafe { vm.set_user_memory_region(user_region).unwrap() };
+        unsafe { vm.set_user_memory_region(user_region)? };
     }
 
     // dummy x86 code that just calls cpuid and halt.
@@ -38,4 +40,6 @@ pub(super) fn setup_memory(vm: &VmFd, memory_size: usize) {
     } else {
         // FIXME
     }
+
+    Ok(())
 }
