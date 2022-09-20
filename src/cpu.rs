@@ -1,5 +1,5 @@
-use kvm_ioctls::{VcpuExit, VcpuFd};
 use anyhow::Result;
+use kvm_ioctls::{VcpuExit, VcpuFd};
 
 pub(super) fn setup_and_run(vcpu_fd: &VcpuFd) -> Result<()> {
     // general purpose registers
@@ -18,12 +18,13 @@ pub(super) fn setup_and_run(vcpu_fd: &VcpuFd) -> Result<()> {
     vcpu_fd.set_sregs(&sp_regs)?;
 
     let vcpu_exit = vcpu_fd.run()?;
+
     match vcpu_exit {
         VcpuExit::Hlt => {
             println!("we are done");
         }
-        default => {
-            println!("this should not happen: {:?}", default);
+        _ => {
+            println!("this should not happen: {:?}", vcpu_exit);
         }
     }
 
